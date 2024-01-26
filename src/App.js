@@ -17,7 +17,8 @@ function App() {
 		const socket = socketIOClient(ENDPOINT)
 
 		socket.on("notification", (newMessage) => {
-			setNotifications((notifications) => [...notifications, newMessage])
+			const newMessageModified = `${socket.id} ${newMessage}`
+			setNotifications((notifications) => [...notifications, newMessageModified])
 		})
 
 		return () => socket.disconnect()
