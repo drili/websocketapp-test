@@ -1,25 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react"
+import socketIOClient from "socket.io-client"
+
+const ENDPOINT = "http://localhost:3001";
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const [notifications, setNotifications] = useState([])
+	const [message, setMessage] = useState("")
+
+	
+	const sendMessage = () => {
+		const socket = socketIOClient(ENDPOINT);
+        socket.emit('sendMessage', message);
+	}
+
+	useEffect(() => {
+		const socket = socketIOClient(ENDPOINT)
+
+		socket.on("notification", (newMessage) => {
+			setNotifications((notifications) => [...notifications, newMessage])
+		})
+
+		return () => socket.disconnect()
+	}, [])
+
+	return (
+		<div>
+			<input
+				type="text"
+				value={message}
+				onChange={(e) => setMessage(e.target.value)}
+			/>
+
+			<button onClick={sendMessage}>Send Message</button>
+
+			<div>
+				{notifications.map((notification, index) => (
+					<div key={index}>
+						{notification}
+					</div>
+				))}
+			</div>
+		</div>
+	)
 }
 
 export default App;
